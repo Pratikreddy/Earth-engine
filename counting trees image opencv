@@ -1,0 +1,71 @@
+import cv2
+import numpy as np
+from skimage.feature import blob_dog
+
+# Read the image
+image = cv2.imread('/mnt/data/image.png')
+
+# Convert the image to grayscale
+gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+# Detect blobs (trees) in the image using Difference of Gaussian (DoG)
+blobs = blob_dog(gray_image, max_sigma=30, threshold=0.1)
+
+# Draw a red dot at the center of each blob (tree)
+for blob in blobs:
+    y, x, r = blob
+    cv2.circle(image, (int(x), int(y)), 3, (0, 0, 255), -1)
+
+# Count the number of trees
+number_of_trees = len(blobs)
+print(f'Number of trees: {number_of_trees}')
+
+# Save the output image
+cv2.imwrite('/mnt/data/marked_trees.png', image)
+
+# Return the path of the saved image with marked trees and the count
+number_of_trees, '/mnt/data/marked_trees.png'
+
+
+import cv2
+import numpy as np
+from skimage.feature import blob_dog, blob_log, blob_doh
+
+# Load the image from file system
+image_path = '/mnt/data/image.png'
+image = cv2.imread(image_path)
+
+# Convert the image to grayscale
+gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+# Define the parameter for blob detection
+# These parameters may need fine-tuning for different images
+params = cv2.SimpleBlobDetector_Params()
+params.filterByArea = True
+params.minArea = 20  # min area of the blobs
+params.filterByCircularity = True
+params.minCircularity = 0.3  # how circular the blob is: 1 is a perfect circle
+params.filterByConvexity = False
+params.filterByInertia = False
+
+# Create a blob detector with the parameters
+detector = cv2.SimpleBlobDetector_create(params)
+
+# Detect blobs (trees)
+keypoints = detector.detect(gray_image)
+
+# Draw a red dot (circle) on the detected blobs (trees)
+image_with_dots = cv2.drawKeypoints(image, keypoints, np.array([]), (0, 0, 255),
+                                    cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+
+# Count the number of detected trees
+number_of_trees = len(keypoints)
+print(f'Number of trees detected: {number_of_trees}')
+
+# Save the output image with the dots
+output_path = '/mnt/data/marked_trees.png'
+cv2.imwrite(output_path, image_with_dots)
+
+# Return the number of trees and the path of the saved image
+number_of_trees, output_path
+
