@@ -1,0 +1,42 @@
+// Define the geometry for the farm using the coordinates you provided
+var farmGeometry = ee.Geometry.MultiPolygon([
+  // Coordinates for the first polygon
+  [[[78.47265567106881, 12.951727178551989],
+    [78.47250010294594, 12.949709015781902],
+    [78.47390021605172, 12.949651507934446],
+    [78.47280051035561, 12.951308774218422],
+    [78.47265567106881, 12.951727178551989]]],
+  // Coordinates for the second polygon
+  [[[78.47422744555153, 12.950195217961838],
+    [78.47452248485317, 12.94963059598662],
+    [78.47553973337779, 12.949583544097605],
+    [78.47511793894448, 12.95029454947329],
+    [78.47422744555153, 12.950195217961838]]]
+]);
+
+// Convert the farm geometry into a feature collection
+var farmFeatures = ee.FeatureCollection([ee.Feature(farmGeometry)]);
+
+// Create an image where everything is set to 1 (unmasked)
+var baseImage = ee.Image.constant(1);
+
+// Create a farm area mask by painting the farm geometry onto the base image
+var farmAreaMask = baseImage.paint({
+  featureCollection: farmFeatures,
+  color: 0  // This will mask the farm area
+});
+
+// Create a non-farm area mask by inverting the farm area mask
+var nonFarmAreaMask = baseImage.subtract(farmAreaMask);
+
+// Set visualization parameters for black color
+var visParams = {palette: ['000000']};
+
+// Add the farm area mask in black to the map
+Map.addLayer(farmAreaMask.selfMask(), visParams, 'Farm Area Mask');
+
+// Add the non-farm area mask in black to the map
+Map.addLayer(nonFarmAreaMask.selfMask(), visParams, 'Non-Farm Area Mask');
+
+// Center the map on the farm area
+Map.centerObject(farmGeometry, 17);
